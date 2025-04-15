@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Codeformers_glimpses from '@/components/codeformers_glimpses';
-
 import sponsorLogo1 from 'assets/images/sponsor.svg';
 import RegisterBtn from '@/components/registerBtn';
 import codeformers from '@/assets/images/codeformer.jpg';
+
+import toast from 'react-hot-toast';
 
 function CodeformerPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ function CodeformerPage() {
     branch: '',
   });
 
-  const [error, setError] = useState<string | null>(null); // Added error state
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,7 +29,6 @@ function CodeformerPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Step 1: Save data to MongoDB
       const dbResponse = await fetch('/api/register', {
         method: 'POST',
         headers: {
@@ -36,13 +36,13 @@ function CodeformerPage() {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (!dbResponse.ok) {
         setError('Registration failed. Please try again.');
+        toast.error('Registration failed. Please try again.');
         return;
       }
-  
-      // Step 2: Send confirmation email
+
       const mailResponse = await fetch('/api/mailregister', {
         method: 'POST',
         headers: {
@@ -50,14 +50,14 @@ function CodeformerPage() {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (!mailResponse.ok) {
         setError('Registration saved, but failed to send confirmation email.');
+        toast.error('Registered, but failed to send confirmation email.');
         return;
       }
-  
-      // Both succeeded
-      alert('Registration successful! Confirmation email sent.');
+
+      toast.success('Registration successful! Confirmation email sent.');
       setFormData({
         name: '',
         email: '',
@@ -66,13 +66,13 @@ function CodeformerPage() {
         year: '',
         branch: '',
       });
-      setError(null); // Clear error on success
+      setError(null);
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred. Please try again later.');
+      toast.error('An error occurred. Please try again later.');
     }
   };
-  
 
   return (
     <>
@@ -120,30 +120,12 @@ function CodeformerPage() {
             </div>
             <div className="flex justify-center">
               <div className="text-center">
-                <div>
-                  <div className="text-[14px] text-gray-500">
-                    <span>Date</span>
-                  </div>
-                  <div>
-                    <span className="text-[18px] font-semibold">Last Wednesday Of Every Month</span>
-                  </div>
-                </div>
-                <div className="mt-1">
-                  <div className="text-[14px] text-gray-500">
-                    <span>Time</span>
-                  </div>
-                  <div>
-                    <span className="text-[18px] font-semibold">01:45 PM - 02:45 PM</span>
-                  </div>
-                </div>
-                <div className="mt-1">
-                  <div className="text-[14px] text-gray-500">
-                    <span>Venue</span>
-                  </div>
-                  <div>
-                    <span className="text-[18px] font-semibold">CL-1 & CL-3 (CS Block)</span>
-                  </div>
-                </div>
+                <div className="text-[14px] text-gray-500">Date</div>
+                <div className="text-[18px] font-semibold">Last Wednesday Of Every Month</div>
+                <div className="mt-1 text-[14px] text-gray-500">Time</div>
+                <div className="text-[18px] font-semibold">01:45 PM - 02:45 PM</div>
+                <div className="mt-1 text-[14px] text-gray-500">Venue</div>
+                <div className="text-[18px] font-semibold">CL-1 & CL-3 (CS Block)</div>
               </div>
             </div>
           </div>
@@ -244,7 +226,9 @@ function CodeformerPage() {
                 />
               </div>
             </div>
-            {error && <div className="text-red-500 mt-4 text-center">{error}</div>} {/* Error message */}
+
+            {error && <div className="text-red-500 mt-4 text-center">{error}</div>}
+
             <button
               type="submit"
               className="mt-6 w-full bg-[#0A146E] hover:bg-[#0f1b95] text-white font-bold py-3 rounded-lg"
